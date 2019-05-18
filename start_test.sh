@@ -9,6 +9,7 @@ CSTART="opcua-cstart.sh"
 
 SERVER_PATH="/home/uddeholm"
 CLIENT_PATH="/home/uddeholm"
+RESULTDIR="$CLIENT_PATH/results"
 
 #SERVER_ADDRESS="uddeholm@uddeholm2-udoo-x86.local"
 #CLIENT_ADDRESS="uddeholm@uddeholm-udoo-x86.local"
@@ -36,7 +37,6 @@ log() {
   esac
 
   echo $MOD "${COLOR}${*}${RST}"
-
 }
 
 remote () {
@@ -65,7 +65,6 @@ close(){
 }
 
 remote_end () {
-
     #disable clean
     remote trap - INT EXIT QUIT ABRT TERM
 
@@ -124,8 +123,7 @@ fi
 
 #start client
 echo "Starting client"
-TMP=$(ssh $CLIENT_ADDRESS \
-	"${CLIENT_PATH}/$CSTART $RQS_RATE $RUN_TIME" )
+TMP=$(${CLIENT_PATH}/$CSTART $RQS_RATE $RUN_TIME)
 
 if [ -z "$TMP" ]
 then
@@ -135,8 +133,13 @@ then
 fi
 
 echo "Downloading results..."
-scp ${CLIENT_ADDRESS}:${TMP} \
-	"opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.log"
+if [ ! -d "$RESULTDIR" ]
+then
+	mkdir -p ${RESULTDIR}
+fi
+
+mv ${TMP}.csv "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.csv"
+mv ${TMP}.pcap "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.pcap"
 
 echo "Done. Killing server..."
 close
