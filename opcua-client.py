@@ -6,6 +6,7 @@ import logging
 import struct
 import sys
 import csv
+import signal
 
 from asyncua import Client
 #from asyncua.ua import uaprotocol_auto
@@ -49,9 +50,18 @@ class SubHandler(object):
         _logger.info("New event", event)
 
 async def run():
+    global stop
+    stop = 0
     url = 'opc.tcp://' + address + ':4840/freeopcua/server/'
     cfile = open(csvfile, 'w', newline='')
     writer = csv.writer(cfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    def interruptHandler(signal, frame):
+        global stop
+        stop = 1
+        print("Interrupt (ID: {}) has been caught. Cleaning up...".format(signal))
+
+    signal.signal(signal.SIGINT, interruptHandler)
 
     try:
         async with Client(url=url) as client:
@@ -82,6 +92,9 @@ async def run():
                     raise Exception("sub died")
                 if not client:
                     raise Exception("client died")
+                if stop:
+                    cfile.close()
+                    break
 
     except Exception:
         _logger.exception('error')
