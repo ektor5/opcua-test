@@ -118,7 +118,7 @@ fi
 
 #start client
 echo "Starting client"
-TMP=$($CSTART $RQS_RATE $RUN_TIME)
+TMP=$(./$CSTART $RQS_RATE $RUN_TIME)
 
 if [ -z "$TMP" ]
 then

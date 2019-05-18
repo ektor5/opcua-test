@@ -3,7 +3,7 @@
 set -e
 
 SERVER_ADDRESS="192.168.10.2"
-CLIENT="opcua-client.py"
+CLIENT="./opcua-client.py"
 
 TMP=$(mktemp /tmp/opcuatest-XXXXX)
 
