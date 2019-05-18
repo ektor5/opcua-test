@@ -8,8 +8,7 @@ CLIENT="opcua-client.py"
 CSTART="opcua-cstart.sh"
 
 SERVER_PATH="/home/uddeholm"
-CLIENT_PATH="/home/uddeholm"
-RESULTDIR="$CLIENT_PATH/results"
+RESULTDIR="results"
 
 #SERVER_ADDRESS="uddeholm@uddeholm2-udoo-x86.local"
 #CLIENT_ADDRESS="uddeholm@uddeholm-udoo-x86.local"
@@ -81,11 +80,7 @@ remote_end () {
 
 #Upload
 log "Uploading new version"
-scp $SERVER ${SERVER_ADDRESS}:${SERVER_PATH}/ &
-S=$!
-scp $CLIENT $CSTART ${CLIENT_ADDRESS}:${CLIENT_PATH}/ &
-
-wait $S $!
+scp $SERVER ${SERVER_ADDRESS}:${SERVER_PATH}/
 
 #start server
 S_LOG="server.log"
@@ -123,7 +118,7 @@ fi
 
 #start client
 echo "Starting client"
-TMP=$(${CLIENT_PATH}/$CSTART $RQS_RATE $RUN_TIME)
+TMP=$($CSTART $RQS_RATE $RUN_TIME)
 
 if [ -z "$TMP" ]
 then
