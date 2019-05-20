@@ -11,7 +11,7 @@ import signal
 from asyncua import Client
 #from asyncua.ua import uaprotocol_auto
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 _logger = logging.getLogger('asyncua')
 
 subs_timeout = 300
@@ -93,6 +93,7 @@ async def run():
                 if not client:
                     raise Exception("client died")
                 if stop:
+                    await sub.delete()
                     cfile.close()
                     break
 

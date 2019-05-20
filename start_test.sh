@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-set -x
+#set -x
 
 SERVER="opcua-server.py"
 CLIENT="opcua-client.py"
@@ -12,7 +12,7 @@ RESULTDIR="results"
 
 #SERVER_ADDRESS="uddeholm@uddeholm2-udoo-x86.local"
 #CLIENT_ADDRESS="uddeholm@uddeholm-udoo-x86.local"
-SERVER_ADDRESS="uddeholm@192.168.0.105"
+SERVER_ADDRESS="uddeholm@192.168.10.2"
 CLIENT_ADDRESS="uddeholm@192.168.0.104"
 
 VARS=$1
@@ -22,13 +22,13 @@ RUN_TIME=$4
 
 log() {
   # args: string
-  local COLOR=${GREEN}${BOLD}  
+  local COLOR=${GREEN}${BOLD}
   local MOD="-e"
 
   case $1 in
     err) COLOR=${RED}${BOLD}
       shift ;;
-    pre) MOD+="n" 
+    pre) MOD+="n"
       shift ;;
     fat) COLOR=${RED}${BOLD}
       shift ;;
@@ -48,21 +48,6 @@ remote () {
 	fi
 }
 
-close(){
-	log "CLEANING "
-	if [ -n "$SERVER_PID" ] && [ -x "/proc/$SERVER_PID" ]
-	then 
-		kill -INT $SERVER_PID
-	fi
-
-	remote_end 'kill $SPID'
-	
-	if [ -x "$S_FIFO" ]
-	then 
-		rm $S_FIFO
-	fi
-}
-
 remote_end () {
     #disable clean
     remote trap - INT EXIT QUIT ABRT TERM
@@ -76,6 +61,26 @@ remote_end () {
 
     #close file descriptor, closes ssh connection
     exec 8>&-
+}
+
+close(){
+	remote trap - INT EXIT QUIT ABRT TERM
+	log "Cleaning... "
+
+	remote_end 'kill $SPID'
+	
+	if [ -e "$S_FIFO" ]
+	then
+		rm "$S_FIFO"
+	fi
+	if [ -e "$TMP.pcap" ]
+	then
+		rm "$TMP.pcap"
+	fi
+	if [ -e "$TMP.csv" ]
+	then
+		rm "$TMP.csv"
+	fi
 }
 
 #Upload
@@ -98,36 +103,37 @@ exec 8> $S_FIFO
 remote <<-LOL
 		clean () {
 			echo cleaning... ;
+			kill -0 \$SPID && kill -INT \$SPID;
 			cd ;
 		} ;
 	LOL
 remote trap clean INT EXIT QUIT ABRT TERM
 
-    
+
 remote ${SERVER_PATH}/$SERVER $VARS $RFR_RATE \&
 remote 'SPID=$!'
 
 trap close INT
-sleep 5 
+sleep 5
 
 if [ ! -x /proc/$SERVER_PID ]
 then
-	echo "server aborted"
+	log err "server aborted"
 	exit 1
 fi
 
 #start client
-echo "Starting client"
+log "Starting client"
 TMP=$(./$CSTART $RQS_RATE $RUN_TIME)
 
 if [ -z "$TMP" ]
 then
-	echo "error: TMP not valid"
+	log err "error: TMP not valid"
 	close
 	exit 1
 fi
 
-echo "Downloading results..."
+log "Downloading results..."
 if [ ! -d "$RESULTDIR" ]
 then
 	mkdir -p ${RESULTDIR}
@@ -136,7 +142,7 @@ fi
 mv ${TMP}.csv "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.csv"
 mv ${TMP}.pcap "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.pcap"
 
-echo "Done. Killing server..."
+log "Done. Killing server..."
 close
 
 exit 0
