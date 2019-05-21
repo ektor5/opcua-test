@@ -62,8 +62,8 @@ async def main():
     await server.start()
     print("Available loggers are: ", logging.Logger.manager.loggerDict.keys())
     while True:
+        await asyncio.sleep(refresh)
         for i in myvars:
-            await asyncio.sleep(refresh)
             server.set_attribute_value(i.nodeid, ua.DataValue(time.time()))
         if (stop):
             break
