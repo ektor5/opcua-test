@@ -55,7 +55,9 @@ async def main():
     myobj = await server.nodes.objects.add_object(idx, "MyObject")
 
     myvars = []
+    count = 0
     for i in range(0,nvars):
+        count = count + 1
         myvar = await myobj.add_variable(idx, f"MyVariable{i}", time.time())
         myvars.append(myvar)
 
@@ -64,21 +66,22 @@ async def main():
     while True:
         await asyncio.sleep(refresh)
         for i in myvars:
+            count = count + 1
             server.set_attribute_value(i.nodeid, ua.DataValue(time.time()))
         if (stop):
+            print(count)
             break
 
-    logging.info("Closing server...") 
+    logging.info("Closing server...")
     await server.stop()
 
 def keyboardInterruptHandler(signal, frame):
-    global stop 
+    global stop
     stop = 1
     print("KeyboardInterrupt (ID: {}) has been caught. Cleaning up...".format(signal))
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, keyboardInterruptHandler)
     loop = asyncio.get_event_loop()
-    loop.set_debug(True)
+    #loop.set_debug(True)
     loop.run_until_complete(main())
-        
