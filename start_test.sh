@@ -73,14 +73,6 @@ close(){
 	then
 		rm "$S_FIFO"
 	fi
-	if [ -e "$TMP.pcap" ]
-	then
-		rm "$TMP.pcap"
-	fi
-	if [ -e "$TMP.csv" ]
-	then
-		rm "$TMP.csv"
-	fi
 }
 
 #Upload

@@ -16,4 +16,6 @@ CLIENT_PID=$!
 wait $TSHARK && kill -INT $CLIENT_PID
 wait $CLIENT_PID
 
+rm $TMP
+
 echo $TMP
