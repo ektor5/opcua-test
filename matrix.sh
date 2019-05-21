@@ -2,9 +2,9 @@
 
 set -e
 
-VARS=(    1       5      10    30   50   100    300  500  1000)
-RFR_RATE=(0.0001  0.001  0.01  0.1  1)                    
-RQS_RATE=(1       2      5     10   100  1000)            
+VARS=(    1       5      10    50   100    500  1000)
+RFR_RATE=(0.0001  0.001  0.01  0.1  1)
+RQS_RATE=(1       5     10   100  1000)
 RUN_TIME=60
 
 for i in ${VARS[@]}
@@ -16,7 +16,7 @@ do
 		do
 			echo -e `date` - "var \t $i rfr \t $r \t rqs $s"
 			if ! ./start_test.sh $i $r $s $RUN_TIME
-			then echo try again 
+			then echo try again
 				./start_test.sh $i $r $s $RUN_TIME
 			fi
 		done
