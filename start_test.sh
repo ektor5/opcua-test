@@ -67,7 +67,7 @@ close(){
 	remote trap - INT EXIT QUIT ABRT TERM
 	log "Cleaning... "
 
-	remote_end 'kill $SPID'
+	remote_end 'kill -INT $SPID'
 	
 	if [ -e "$S_FIFO" ]
 	then
@@ -114,7 +114,7 @@ remote ${SERVER_PATH}/$SERVER $VARS $RFR_RATE \&
 remote 'SPID=$!'
 
 trap close INT
-sleep 5
+sleep 10
 
 if [ ! -x /proc/$SERVER_PID ]
 then
@@ -126,10 +126,11 @@ fi
 log "Starting client"
 TMP=$(./$CSTART $RQS_RATE $RUN_TIME)
 
+close
+
 if [ -z "$TMP" ]
 then
 	log err "error: TMP not valid"
-	close
 	exit 1
 fi
 
@@ -143,6 +144,5 @@ mv ${TMP}.csv "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME
 mv ${TMP}.pcap "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.pcap"
 
 log "Done. Killing server..."
-close
 
 exit 0
