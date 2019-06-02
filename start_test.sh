@@ -118,6 +118,7 @@ fi
 log "Starting client"
 TMP=$(./$CSTART $RQS_RATE $RUN_TIME)
 
+log "Done. Killing server..."
 close
 
 if [ -z "$TMP" ]
@@ -135,6 +136,9 @@ fi
 mv ${TMP}.csv "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.csv"
 mv ${TMP}.pcap "$RESULTDIR/opcua_v${VARS}_rf${RFR_RATE}_rq${RQS_RATE}_t${RUN_TIME}.pcap"
 
-log "Done. Killing server..."
+sleep 1
+COUNT=$(ssh $SERVER_ADDRESS cat /tmp/opcua-counting)
+log "count $COUNT"
+echo ${VARS} ${RFR_RATE} ${RQS_RATE} $COUNT >> var_counting
 
 exit 0

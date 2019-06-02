@@ -5,6 +5,7 @@ import copy
 import logging
 import time
 import sys
+import csv   
 from asyncua import ua, uamethod, Server
 
 refresh = 0.1
@@ -63,13 +64,16 @@ async def main():
 
     await server.start()
     print("Available loggers are: ", logging.Logger.manager.loggerDict.keys())
+    
+    fd = open('/tmp/opcua-counting', 'w')
     while True:
         await asyncio.sleep(refresh)
         for i in myvars:
             count = count + 1
             server.set_attribute_value(i.nodeid, ua.DataValue(time.time()))
         if (stop):
-            print(count)
+            fd.write(str(count))
+            fd.close()
             break
 
     logging.info("Closing server...")

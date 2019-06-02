@@ -7,6 +7,8 @@ RFR_RATE=(0.0001  0.001  0.01  0.1  1)
 RQS_RATE=(1       5     10   100  1000)
 RUN_TIME=60
 
+rm -f var_counting
+
 for i in ${VARS[@]}
 do
 	for r in ${RFR_RATE[@]}
@@ -25,5 +27,5 @@ do
 	
 done
 
-
+mv var_counting var_counting_`date +%y%m%d`.csv
 

@@ -49,6 +49,11 @@ class SubHandler(object):
     def event_notification(self, event):
         _logger.info("New event", event)
 
+async def timer():
+    global stop
+    await asyncio.sleep(60)
+    stop = 1
+
 async def run():
     global stop
     stop = 0
@@ -85,6 +90,9 @@ async def run():
                     SubHandler(writer,_logger,nodemap))
 
             await sub.subscribe_data_change(subs)
+            loop = asyncio.get_event_loop()
+            loop.create_task(timer())
+            
             while True:
                 await asyncio.sleep(0.5)
                 cfile.flush()
